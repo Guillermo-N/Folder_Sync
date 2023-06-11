@@ -4,5 +4,4 @@ destination
 source
 venv
 TASK.md
-test_folder_sync.py
 folder_sync.log
