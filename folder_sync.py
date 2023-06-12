@@ -154,16 +154,31 @@ def main():
                         shutil.copy(src_file_path, dst_file_path)
                         dst_file_fingerprint = file_fingerprint(dst_file_path)
                         if old_file_historic[file_path] == dst_file_fingerprint:
+                            # File update
                             logger.info(f'File {file_path} updated')
                         else:
+                            # Last modified in dst
                             logger.warning(
                                 f'File {file_path} updated, dst version overwritten')
-                    except:
+                    except BaseException:
+                        # Resource missing, copy not possible
                         logger.error(
                             f"File {file_path} can't be updated; resource missing.")
                 elif file_path in deleted_files:
-                    os.remove(dst_file_path)
-                    logger.info(f'File {file_path} deleted')
+                    try:
+                        os.remove(dst_file_path)
+                        dst_file_fingerprint = file_fingerprint(dst_file_path)
+                        if file_historic[file_path] == dst_file_fingerprint:
+                            # File deletion
+                            logger.info(f'File {file_path} deleted')
+                        else:
+                            # Last modified in dst
+                            logger.warning(
+                                f'File {file_path} deleted, dst version differ from src')
+                    except FileNotFoundError as e:
+                        # File missing in dst
+                        logger.error(
+                            f"File {file_path} already deleted; resource missing.")
 
         # Creating new dirs in dst
         for dir in created_dirs:
